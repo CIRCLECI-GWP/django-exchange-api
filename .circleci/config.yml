@@ -1,0 +1,29 @@
+version: 2.1
+
+orbs:
+  python: circleci/python@3.0.0
+  eb: circleci/aws-elastic-beanstalk@2.0.1
+
+jobs:
+  build:
+    description: "Setup Django application and run tests"
+    executor: python/default
+    steps:
+      - checkout
+      - python/install-packages:
+          pkg-manager: pip
+      - run:
+          name: "Run tests"
+          command: python manage.py test
+
+workflows:
+  build-and-deploy:
+    jobs:
+      - build
+      - eb/deploy:
+          context: aws-credentials
+          application-name: exchangeRatesApi
+          environment-name: django-env
+          platform-version: python-3.9
+          requires:
+            - build
